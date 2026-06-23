@@ -8,6 +8,7 @@ import config from "./config";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcryptjs";
 import { UserRoutes } from "./modules/users/user.route";
+import { authRoutes } from "./modules/auth/auth.routes";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,5 +31,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/users", UserRoutes);
+app.use("/api/auth",authRoutes)
 
 export default app;

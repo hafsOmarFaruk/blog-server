@@ -1,0 +1,31 @@
+import bcrypt from "bcryptjs";
+import { prisma } from "../../lib/prisma";
+import { ILoginUser } from "./auth.interface"
+
+const logingUser= async(payload:ILoginUser)=>{
+
+    const {email,password}=payload;
+    // const user=await prisma.user.findUnique({
+    //     where:{email}
+    // })
+    // if(!user){
+    //     throw new Error('user not found')
+    // }
+
+    const user=await prisma.user.findUniqueOrThrow({
+        where:{email}
+    })
+
+    const isPasswordMatched=await bcrypt.compare(password,user.password)
+
+    if(!isPasswordMatched){
+        throw new Error("Password is incorrect")
+    }
+
+    return user;
+
+}
+
+export const authService={
+    logingUser
+}
