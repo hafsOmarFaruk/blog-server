@@ -66,7 +66,9 @@ const getMyProfile = catchAsync(
     //   throw new Error(verifiedToken);
     // }
 
-    const profile = await userService.getMyProfileFromDB(req.user?.id as string);
+    const profile = await userService.getMyProfileFromDB(
+      req.user?.id as string,
+    );
     // console.log(verifiedToken);
 
     sendREsponse(res, {
@@ -78,7 +80,25 @@ const getMyProfile = catchAsync(
   },
 );
 
+const updateMyProfile = catchAsync(async (req, res, next) => {
+  const userId = req.user?.id as string;
+  const payload = req.body;
+
+  const updateProfile = await userService.updateMyProfileFromDB(
+    userId,
+    payload,
+  );
+
+  sendREsponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "user profile updated successfully",
+    data: { updateProfile },
+  });
+});
+
 export const userController = {
   createUser,
   getMyProfile,
+  updateMyProfile,
 };
