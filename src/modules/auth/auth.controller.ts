@@ -4,19 +4,34 @@ import { authService } from "./auth.service";
 import { sendREsponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
-const logingUser=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+const logingUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const { accessToken, refreshToken } = await authService.logingUser(payload);
 
-    const payload=req.body;
-    const logingUserResult=await authService.logingUser(payload);
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, //24 hour one day
+    });
 
-    sendREsponse(res,{
-        success:true,
-        statusCode:httpStatus.CREATED,
-        message:"user looged in successfully",
-        data:logingUserResult
-    })
-})
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 *7
+    });
 
-export const authController={
-    logingUser
-}
+    sendREsponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "user looged in successfully",
+      data: { accessToken, refreshToken },
+    });
+  },
+);
+
+export const authController = {
+  logingUser,
+};
