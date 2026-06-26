@@ -5,11 +5,23 @@ const createToken = (
   secret: string,
   expiresIn: SignOptions,
 ) => {
-  const token = jwt.sign(payload, secret, {expiresIn}as SignOptions);
+  const token = jwt.sign(payload, secret, { expiresIn } as SignOptions);
 
   return token;
 };
 
+const verifiedToken = (token: string, secret: string) => {
+  //  const verifiedToken=jwt.verify(token,secret);
+  //  return verifiedToken;
+  try {
+    const verifiedToken = jwt.verify(token, secret);
+    return verifiedToken;
+  } catch (error) {
+    throw new Error("invaild Token");
+  }
+};
+
 export const jwtUtils = {
   createToken,
+  verifiedToken,
 };
