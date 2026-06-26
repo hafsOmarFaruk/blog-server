@@ -19,6 +19,10 @@ const logingUser = async (payload: ILoginUser) => {
     where: { email },
   });
 
+  if (user.activeStatus === "BLOCKED") {
+    throw new Error("your account has been bloked. please contact support");
+  }
+
   const isPasswordMatched = await bcrypt.compare(password, user.password);
 
   if (!isPasswordMatched) {
@@ -36,21 +40,21 @@ const logingUser = async (payload: ILoginUser) => {
   //   expiresIn: config.jwt_access_exprire_in,
   // } as SignOptions);
 
-  const accessToken=jwtUtils.createToken(
+  const accessToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_access_secret,
-    config.jwt_access_exprire_in as SignOptions
-  )
+    config.jwt_access_exprire_in as SignOptions,
+  );
 
   // const refreshToken = jwt.sign(jwtPayload, config.jwt_refresh_exprire_in, {
   //   expiresIn: config.jwt_refresh_exprire_in,
   // } as SignOptions);
 
-  const refreshToken=jwtUtils.createToken(
+  const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
-    config.jwt_refresh_exprire_in as SignOptions
-  )
+    config.jwt_refresh_exprire_in as SignOptions,
+  );
 
   return {
     accessToken,

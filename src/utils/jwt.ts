@@ -1,4 +1,5 @@
 import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import { error } from "node:console";
 
 const createToken = (
   payload: JwtPayload,
@@ -15,9 +16,15 @@ const verifiedToken = (token: string, secret: string) => {
   //  return verifiedToken;
   try {
     const verifiedToken = jwt.verify(token, secret);
-    return verifiedToken;
-  } catch (error) {
-    throw new Error("invaild Token");
+    return {
+      success: true,
+      data: verifiedToken,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 };
 
