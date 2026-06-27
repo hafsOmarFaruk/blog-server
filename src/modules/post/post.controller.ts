@@ -29,33 +29,76 @@ const getAllPosts = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getPostById = catchAsync(async (req: Request, res: Response) => {
-  const postId=req.params.postId;
-  if(!postId){
-    throw new Error("Post id required in params")
+  const postId = req.params.postId;
+  if (!postId) {
+    throw new Error("Post id required in params");
   }
-  const result=await postService.getPostById(postId as string)
+  const result = await postService.getPostById(postId as string);
 
-    sendREsponse(res, {
+  sendREsponse(res, {
     success: true,
     statusCode: 200,
     message: "post retrieved successfully",
     data: result,
   });
-
 });
 
-const updatePost = catchAsync(async (req: Request, res: Response) => {});
+const updatePost = catchAsync(async (req: Request, res: Response) => {
+  const authorId = req.user?.id;
+  const isAdmin = req.user?.role === "ADMIN";
 
-const deletePost = catchAsync(async (req: Request, res: Response) => {});
+  const postId = req.params.postId;
+  if (!postId) {
+    throw new Error("Post id required in params");
+  }
+  const payload = req.body;
+
+  const result = await postService.updatePost(
+    postId as string,
+    payload,
+    authorId as string,
+    isAdmin,
+  );
+
+  sendREsponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "post updated successfully",
+    data: result,
+  });
+});
+
+const deletePost = catchAsync(async (req: Request, res: Response) => {
+  const authorId = req.user?.id;
+  const isAdmin = req.user?.role === "ADMIN";
+
+  const postId = req.params.postId;
+
+  if (!postId) {
+    throw new Error("Post id required in params");
+  }
+  const result = await postService.deletePost(
+    postId as string,
+    authorId as string,
+    isAdmin,
+  );
+
+  sendREsponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "post deleted successfully",
+    data: result,
+  });
+});
 
 const getPostsStats = catchAsync(async (req: Request, res: Response) => {});
 
 const getMyPosts = catchAsync(async (req: Request, res: Response) => {
-  const authorId=req.user?.id;
+  const authorId = req.user?.id;
 
-  const result=await postService.getMyPosts(authorId as string)
+  const result = await postService.getMyPosts(authorId as string);
 
-    sendREsponse(res, {
+  sendREsponse(res, {
     success: true,
     statusCode: 201,
     message: "get  my all post successfully",

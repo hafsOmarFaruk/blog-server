@@ -53,9 +53,61 @@ const getPostById = async (postId: string) => {
   return updatedPost;
 };
 
-const updatePost = () => {};
+const updatePost = async (
+  postId: string,
+  payload: Partial<IcreatePostPayload>,
+  authorId: string,
+  isAdmin: boolean,
+) => {
+  const post = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+  });
 
-const deletePost = () => {};
+  if (!isAdmin && post.authorId !== authorId) {
+    throw new Error("you are not the owner of this post");
+  }
+
+  const result = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: payload,
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+    },
+  });
+
+  return result;
+};
+
+const deletePost = async (
+  postId: string,
+  authorId: string,
+  isAdmin: boolean,
+) => {
+  const post =await prisma.post.findUniqueOrThrow(
+    {where:{
+      id:postId
+    }}
+  )
+  if(!isAdmin && post.authorId!==authorId){
+    throw new Error("you are not owner this post")
+  }
+  const result=await prisma.post.delete({
+    where:{
+      id:postId
+    }
+  });
+
+  return result;
+};
 
 const getPostsStats = () => {};
 

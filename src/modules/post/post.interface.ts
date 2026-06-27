@@ -9,3 +9,11 @@ export interface IcreatePostPayload{
     status?:PostStatus,
     tags:string[]
 }
+export interface IUpdatePostPayload{
+    title?:string,
+    content?:string,
+    thumbail?:string,
+    isFetured?:boolean,
+    status?:PostStatus,
+    tags?:string[]
+}
