@@ -1,3 +1,4 @@
+import { CommentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { IcreatePostPayload } from "./post.interface";
 
@@ -27,30 +28,85 @@ const getAllPosts = async () => {
 };
 
 const getPostById = async (postId: string) => {
-  const post = await prisma.post.findFirstOrThrow({
-    where: {
-      id: postId,
-    },
-  });
+  //   await prisma.post.update({
+  //     where: { id: postId },
+  //     data: {
+  //       views: {
+  //         increment: 1,
+  //       },
+  //     },
+  //   });
+  // //Transaction And Rollback =>amar sob sucess hole hobe nah hole sob  hobe nah
+  //   // throw new Error("Fake error");
 
-  const updatedPost = await prisma.post.update({
-    where: { id: postId },
-    data: {
-      views: {
-        increment: 1,
-      },
-    },
-    include: {
-      author: {
-        omit: {
-          password: true,
+  //   const post = await prisma.post.findFirstOrThrow({
+  //     where: {
+  //       id: postId,
+  //     },
+  //     include: {
+  //       author: {
+  //         omit: {
+  //           password: true,
+  //         },
+  //       },
+  //       comments: {
+  //         where: {
+  //           status: CommentStatus.APPROVED,
+  //         },
+  //         orderBy: {
+  //           createdAt: "desc",
+  //         },
+  //       },
+  //       _count: {
+  //         select: {
+  //           comments: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return post;
+
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: { id: postId },
+      data: {
+        views: {
+          increment: 1,
         },
       },
-      comments: true,
-    },
+    });
+    // throw new Error("Fake error");
+    const post = await tx.post.findFirstOrThrow({
+      where: {
+        id: postId,
+      },
+      include: {
+        author: {
+          omit: {
+            password: true,
+          },
+        },
+        comments: {
+          where: {
+            status: CommentStatus.APPROVED,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
+      },
+    });
+
+    return post;
   });
 
-  return updatedPost;
+  return transactionResult;
 };
 
 const updatePost = async (
@@ -92,18 +148,18 @@ const deletePost = async (
   authorId: string,
   isAdmin: boolean,
 ) => {
-  const post =await prisma.post.findUniqueOrThrow(
-    {where:{
-      id:postId
-    }}
-  )
-  if(!isAdmin && post.authorId!==authorId){
-    throw new Error("you are not owner this post")
+  const post = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+  });
+  if (!isAdmin && post.authorId !== authorId) {
+    throw new Error("you are not owner this post");
   }
-  const result=await prisma.post.delete({
-    where:{
-      id:postId
-    }
+  const result = await prisma.post.delete({
+    where: {
+      id: postId,
+    },
   });
 
   return result;
