@@ -13,7 +13,11 @@ router.post(
 
 router.get("/", auth(), postController.getAllPosts);
 
-router.get("/stats", auth(), postController.getPostsStats);
+router.get(
+  "/stats",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.getPostsStats,
+);
 
 router.get(
   "/my-posts",
