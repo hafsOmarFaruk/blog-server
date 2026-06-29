@@ -2,6 +2,7 @@ import { count } from "node:console";
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { IcreatePostPayload } from "./post.interface";
+import { PostWhereInput } from "../../../generated/prisma/models";
 
 const createPost = async (payload: IcreatePostPayload, userId: string) => {
   const result = await prisma.post.create({
@@ -14,8 +15,53 @@ const createPost = async (payload: IcreatePostPayload, userId: string) => {
   return result;
 };
 
-const getAllPosts = async () => {
+interface IPostQuery extends PostWhereInput {
+  // post model er fildes
+  // title?:string,
+  // content?:string,
+
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+const getAllPosts = async (query: IPostQuery) => {
   const posts = await prisma.post.findMany({
+    where: {
+      AND: [
+        //searching
+        query.searchTerm
+          ? {
+              OR: [
+                {
+                  title: {
+                    contains: query.searchTerm,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  content: {
+                    contains: query.searchTerm,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            }
+          : {},
+        // {
+        //   title:query.title
+        // }
+        //title filterring
+        query.title ? { title: query.title } : {},
+        //content filterring
+        query.content ? { content: query.content } : {},
+
+        //combine serchngig an filtering
+      ],
+    },
+
     include: {
       author: {
         omit: {
