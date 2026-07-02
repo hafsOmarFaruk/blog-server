@@ -1,0 +1,23 @@
+model Subcription{
+    id String @id @default(uuid())
+    userId String @unique 
+    user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+
+    status SubcriptionStatus @default(ACTIVE)
+    currentPeriodEnd DateTime
+
+// STRIPE RELEATE IDES
+
+//stripe cutomer id 
+// stripe subcription id
+
+    createdAt DateTime @default(now())
+    updatedAT DateTime @updatedAt
+
+}
+
+enum SubcriptionStatus{
+    ACTIVE
+    CANCENLD
+    EXPIRED
+}
